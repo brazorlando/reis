@@ -231,7 +231,7 @@ function AtalhoRapido({
   descricao,
 }: {
   href: string;
-  icone: React.ComponentType<{ size?: number }>;
+  icone: React.ComponentType<{ size?: string | number }>;
   titulo: string;
   descricao: string;
 }) {
