@@ -51,6 +51,11 @@ const items = [
     icone: KeyRound,
   },
   {
+  titulo: "Notas",
+  href: "/admin/notas",
+  icone: ClipboardList,
+  },
+  {
     titulo: "Configurações",
     href: "/admin/configuracoes",
     icone: Settings,
