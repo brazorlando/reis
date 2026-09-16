@@ -47,6 +47,11 @@ const items = [
     icone: Shield,
   },
   {
+  titulo: "Atribuições",
+  href: "/admin/atribuicoes",
+  icone: Link2,
+  },
+  {
     titulo: "PIN de Cadastro",
     href: "/admin/pin",
     icone: KeyRound,
