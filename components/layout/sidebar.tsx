@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Calendar,
   FileText,
+  CalendarCheck,
   ClipboardList,
   Settings,
   Shield,
