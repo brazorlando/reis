@@ -1,4 +1,5 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, LogIn } from "lucide-react";
 
 export default function Home() {
   return (
@@ -24,8 +25,22 @@ export default function Home() {
           Escola Rei dos Reis
         </p>
 
-        <div className="inline-block px-6 py-3 rounded-lg bg-accent text-white font-medium shadow-elevated">
-          Em construção
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-white font-medium shadow-elevated hover:bg-accent-600 transition-colors"
+          >
+            <LogIn size={18} />
+            Entrar no sistema
+          </Link>
+
+          <Link
+            href="/cadastro"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-white/30 text-white font-medium hover:bg-white/10 transition-colors"
+          >
+            Cadastrar funcionário
+            <ArrowRight size={18} />
+          </Link>
         </div>
       </div>
 
