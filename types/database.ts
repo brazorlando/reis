@@ -182,3 +182,17 @@ export type Nota = {
 export type NotaComMedia = Nota & {
   media: number | null;
 };
+
+// ---------- FALTAS ----------
+export type Falta = {
+  id: string;
+  aluno_id: string;
+  disciplina_id: string;
+  turma_id: string;
+  data: string;
+  tipo: "presenca" | "falta" | "falta_justificada" | "atraso";
+  observacao: string | null;
+  lancado_por: string | null;
+  criado_em: string;
+  atualizado_em: string;
+};
