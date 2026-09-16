@@ -15,13 +15,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
-  async function handleLogin(e: React.FormEvent) {
+    async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setErro(null);
     setLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -36,7 +36,29 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/admin");
+    // Verificar role para redirecionar
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, status")
+      .eq("id", data.user.id)
+      .single();
+
+    if (!profile || profile.status !== "aprovado") {
+      setErro("A sua conta ainda não foi aprovada pela direção.");
+      await supabase.auth.signOut();
+      setLoading(false);
+      return;
+    }
+
+    if (profile.role === "admin") {
+      router.push("/admin");
+    } else if (profile.role === "funcionario") {
+      router.push("/professor");
+    } else if (profile.role === "aluno") {
+      router.push("/aluno");
+    } else {
+      router.push("/");
+    }
     router.refresh();
   }
 
