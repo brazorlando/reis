@@ -56,6 +56,11 @@ const items = [
   icone: ClipboardList,
   },
   {
+  titulo: "Faltas",
+  href: "/admin/faltas",
+  icone: CalendarCheck,
+  },
+  {
     titulo: "Configurações",
     href: "/admin/configuracoes",
     icone: Settings,
