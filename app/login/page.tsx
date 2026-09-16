@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
@@ -15,7 +16,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
-    async function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setErro(null);
     setLoading(true);
@@ -78,9 +79,7 @@ export default function LoginPage() {
             />
           </div>
           <h1 className="font-serif text-4xl mb-3">Reis Manager</h1>
-          <p className="text-primary-100 text-lg">
-            Sistema de Gestão Escolar
-          </p>
+          <p className="text-primary-100 text-lg">Sistema de Gestão Escolar</p>
         </div>
         <div>
           <p className="text-accent text-sm tracking-widest uppercase mb-2">
@@ -92,7 +91,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Coluna direita — formulário (mantém o resto igual) */}
+      {/* Coluna direita — formulário */}
       <div className="flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md">
           <div className="mb-8">
@@ -140,7 +139,7 @@ export default function LoginPage() {
               </div>
             )}
 
-            <Button type="submit" disabled={loading} className="w-full">
+            <Button type="submit" disabled={loading} className="w-full" size="lg">
               {loading ? (
                 <>
                   <Loader2 size={18} className="animate-spin" />
@@ -154,6 +153,24 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
+
+          {/* Divisor */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-3 text-slate-500">ou</span>
+            </div>
+          </div>
+
+          {/* Botão aluno */}
+          <Link
+            href="/login/aluno"
+            className="block w-full text-center px-5 py-3 rounded-lg border border-border bg-surface text-primary font-medium hover:bg-primary-50 transition-colors"
+          >
+            Entrar como aluno
+          </Link>
 
           <p className="mt-8 text-center text-sm text-slate-500">
             Problemas para acessar? Contacte a secretaria da escola.
