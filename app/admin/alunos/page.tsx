@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Filters } from "@/components/ui/filters";
 import { PageHeader } from "@/components/ui/page-header";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { AlunoModal } from "@/components/admin/alunos/aluno-modal";
 import {
   Plus,
