@@ -12,7 +12,13 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(
+          cookiesToSet: {
+            name: string;
+            value: string;
+            options?: Record<string, unknown>;
+          }[]
+        ) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
@@ -31,20 +37,17 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  // Rotas públicas (não exigem login)
   const rotasPublicas = ["/", "/login", "/cadastro", "/sobre", "/contacto"];
   const ehRotaPublica = rotasPublicas.some(
     (r) => path === r || path.startsWith(r + "/")
   );
 
-  // Se não está logado e tenta acessar rota protegida → /login
   if (!user && !ehRotaPublica && !path.startsWith("/api")) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Se está logado e tenta acessar /login → /admin
   if (user && path === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/admin";
