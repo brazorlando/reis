@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, use } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Header } from "@/components/layout/header";
@@ -22,7 +22,6 @@ import {
   Mail,
   Phone,
   Calendar,
-  Users,
   FileText,
   User,
   BookOpen,
@@ -35,14 +34,22 @@ import {
   corNota,
   estadoNota,
 } from "@/lib/notas";
-import type { Aluno, Area, Classe, Disciplina, Nota, Turma } from "@/types/database";
+import type {
+  Aluno,
+  Area,
+  Classe,
+  Disciplina,
+  Nota,
+  Turma,
+} from "@/types/database";
 
 export default function AlunoDetalhePage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = use(params);
+  const { id } = params;
+
   const [aluno, setAluno] = useState<Aluno | null>(null);
   const [turma, setTurma] = useState<Turma | null>(null);
   const [classe, setClasse] = useState<Classe | null>(null);
@@ -101,7 +108,7 @@ export default function AlunoDetalhePage({
         setClasse(classeRes.data);
         setArea(areaRes.data);
 
-        // Buscar disciplinas da turma (por classe e área)
+        // Buscar disciplinas da turma
         let discQuery = supabase
           .from("disciplinas")
           .select("*")
@@ -137,7 +144,6 @@ export default function AlunoDetalhePage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Notas do aluno por disciplina
   const notasPorDisciplina = useMemo(() => {
     const map: Record<string, Nota[]> = {};
     notas.forEach((n) => {
@@ -147,7 +153,6 @@ export default function AlunoDetalhePage({
     return map;
   }, [notas]);
 
-  // Estatísticas gerais
   const estatisticas = useMemo(() => {
     if (notas.length === 0) return null;
 
