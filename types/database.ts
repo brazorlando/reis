@@ -196,3 +196,14 @@ export type Falta = {
   criado_em: string;
   atualizado_em: string;
 };
+
+// ---------- ATRIBUIÇÕES ----------
+export type Atribuicao = {
+  id: string;
+  professor_id: string;
+  disciplina_id: string;
+  turma_id: string;
+  ano_letivo: number;
+  criado_por: string | null;
+  criado_em: string;
+};
