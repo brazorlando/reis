@@ -29,10 +29,6 @@ const items = [
     titulo: "Professores",
     href: "/admin/professores",
     icone: Users,
-    submenu: [
-      { titulo: "Pendentes", href: "/admin/professores?status=pendente" },
-      { titulo: "Ativos", href: "/admin/professores?status=aprovado" },
-    ],
   },
   {
     titulo: "Alunos",
@@ -43,11 +39,6 @@ const items = [
     titulo: "Estrutura",
     href: "/admin/estrutura",
     icone: School,
-    submenu: [
-      { titulo: "Turmas", href: "/admin/estrutura/turmas" },
-      { titulo: "Disciplinas", href: "/admin/estrutura/disciplinas" },
-      { titulo: "Salas", href: "/admin/estrutura/salas" },
-    ],
   },
   {
     titulo: "Cargos",
@@ -58,26 +49,6 @@ const items = [
     titulo: "PIN de Cadastro",
     href: "/admin/pin",
     icone: KeyRound,
-  },
-  {
-    titulo: "Formulário",
-    href: "/admin/formulario",
-    icone: ClipboardList,
-  },
-  {
-    titulo: "Comunicação",
-    href: "/admin/comunicacao",
-    icone: MessageSquare,
-  },
-  {
-    titulo: "Calendário",
-    href: "/admin/calendario",
-    icone: Calendar,
-  },
-  {
-    titulo: "Documentos",
-    href: "/admin/documentos",
-    icone: FileText,
   },
   {
     titulo: "Configurações",
