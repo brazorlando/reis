@@ -15,7 +15,7 @@ import {
   FileText,
   CalendarCheck,
   ClipboardList,
-  link2,
+  Link2,
   Settings,
   Shield,
 } from "lucide-react";
