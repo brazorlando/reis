@@ -137,7 +137,7 @@ export function AlunoModal({
       ({ error } = await supabase.from("alunos").insert(payload));
     }
 
-    if (error) {
+        if (error) {
       setErro(
         error.message.includes("duplicate")
           ? "Já existe um aluno com este número de matrícula."
@@ -145,6 +145,24 @@ export function AlunoModal({
       );
       setLoading(false);
       return;
+    }
+
+    // Se é novo aluno com BI, criar acesso
+    if (!aluno && payload.bi_documento) {
+      // Buscar o ID do aluno recém-criado
+      const { data: novoAluno } = await supabase
+        .from("alunos")
+        .select("id")
+        .eq("numero_matricula", payload.numero_matricula)
+        .single();
+
+      if (novoAluno?.id) {
+        await fetch("/api/admin/aluno/criar-acesso", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ aluno_id: novoAluno.id }),
+        });
+      }
     }
 
     setLoading(false);
