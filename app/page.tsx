@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, LogIn } from "lucide-react";
 
 export default function Home() {
@@ -6,10 +7,15 @@ export default function Home() {
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-24 bg-gradient-to-b from-primary to-primary-700">
       <div className="max-w-2xl text-center">
         <div className="mb-8 flex justify-center">
-          <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-elevated">
-            <span className="font-serif text-primary text-3xl font-bold">
-              RR
-            </span>
+          <div className="w-32 h-32 rounded-full bg-white flex items-center justify-center shadow-elevated overflow-hidden p-2">
+            <Image
+              src="/logo.jpg"
+              alt="Escola Rei dos Reis"
+              width={128}
+              height={128}
+              className="object-contain"
+              priority
+            />
           </div>
         </div>
 
