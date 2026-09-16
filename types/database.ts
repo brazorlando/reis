@@ -163,3 +163,22 @@ export type PerguntaCadastro = {
   ativa: boolean;
   criado_em: string;
 };
+
+// ---------- NOTAS ----------
+export type Nota = {
+  id: string;
+  aluno_id: string;
+  disciplina_id: string;
+  turma_id: string;
+  trimestre: 1 | 2 | 3;
+  acs1: number | null;
+  acs2: number | null;
+  ap: number | null;
+  lancado_por: string | null;
+  criado_em: string;
+  atualizado_em: string;
+};
+
+export type NotaComMedia = Nota & {
+  media: number | null;
+};
