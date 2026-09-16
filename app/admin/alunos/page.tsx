@@ -333,17 +333,26 @@ export default function AlunosPage() {
                           </Badge>
                         </td>
                         <td className="px-5 py-4 text-right">
-                          <button
-                            onClick={() => {
-                              setEditando(a);
-                              setModalAberto(true);
-                            }}
-                            className="inline-flex items-center gap-1 text-accent hover:text-accent-600 text-sm font-medium"
-                          >
-                            <Pencil size={14} />
-                            Editar
-                          </button>
-                        </td>
+  <div className="flex items-center justify-end gap-3">
+    <Link
+      href={`/admin/alunos/${a.id}`}
+      className="inline-flex items-center gap-1 text-primary hover:text-primary-500 text-sm font-medium"
+    >
+      Ver
+      <ArrowRight size={14} />
+    </Link>
+    <button
+      onClick={() => {
+        setEditando(a);
+        setModalAberto(true);
+      }}
+      className="inline-flex items-center gap-1 text-accent hover:text-accent-600 text-sm font-medium"
+    >
+      <Pencil size={14} />
+      Editar
+    </button>
+  </div>
+</td>
                       </tr>
                     );
                   })}
