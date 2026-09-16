@@ -119,6 +119,7 @@ export type Turma = {
 // ---------- ALUNOS ----------
 export type Aluno = {
   id: string;
+  user_id: string | null;
   numero_matricula: string;
   nome_completo: string;
   data_nascimento: string | null;
