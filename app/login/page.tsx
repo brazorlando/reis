@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,8 +45,15 @@ export default function LoginPage() {
       {/* Coluna esquerda — institucional */}
       <div className="hidden lg:flex flex-col justify-between bg-primary text-white p-12">
         <div>
-          <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6">
-            <span className="font-serif text-primary text-2xl font-bold">RR</span>
+          <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center mb-6 overflow-hidden p-2">
+            <Image
+              src="/logo.jpg"
+              alt="Escola Rei dos Reis"
+              width={96}
+              height={96}
+              className="object-contain"
+              priority
+            />
           </div>
           <h1 className="font-serif text-4xl mb-3">Reis Manager</h1>
           <p className="text-primary-100 text-lg">
@@ -56,13 +64,13 @@ export default function LoginPage() {
           <p className="text-accent text-sm tracking-widest uppercase mb-2">
             Escola Rei dos Reis
           </p>
-          <p className="text-primary-100 text-sm">
+          <p className="text-primary-100 text-sm italic">
             Buscai primeiro o reino de Deus
           </p>
         </div>
       </div>
 
-      {/* Coluna direita — formulário */}
+      {/* Coluna direita — formulário (mantém o resto igual) */}
       <div className="flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md">
           <div className="mb-8">
