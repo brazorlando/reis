@@ -93,7 +93,7 @@ export function AlunoModal({
     return `${t.nome}${area ? ` (Área ${area.codigo})` : ""}`;
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro(null);
 
@@ -109,13 +109,24 @@ export function AlunoModal({
       data: { user },
     } = await supabase.auth.getUser();
 
+    // Validação robusta de UUIDs
+    function idValido(v: string | null | undefined): string | null {
+      if (!v) return null;
+      const s = String(v).trim();
+      if (s === "" || s === "undefined" || s === "null") return null;
+      return s;
+    }
+
+    const turmaId = idValido(form.turma_id);
+    const criadoPor = idValido(user?.id);
+
     const payload: Record<string, unknown> = {
       nome_completo: form.nome_completo.trim(),
       data_nascimento: form.data_nascimento || null,
       genero: form.genero || null,
       bi_documento: form.bi_documento.trim() || null,
-      turma_id: form.turma_id || null,
-      ano_letivo: parseInt(form.ano_letivo),
+      turma_id: turmaId,
+      ano_letivo: parseInt(form.ano_letivo) || new Date().getFullYear(),
       nome_encarregado: form.nome_encarregado.trim() || null,
       telefone_encarregado: form.telefone_encarregado.trim() || null,
       email_encarregado: form.email_encarregado.trim() || null,
@@ -131,13 +142,24 @@ export function AlunoModal({
         .update(payload)
         .eq("id", aluno.id));
     } else {
-      const { data: mat } = await supabase.rpc("gerar_matricula");
-      payload.numero_matricula = mat ?? `RR-${form.ano_letivo}-0001`;
-      payload.criado_por = user?.id ?? null;
+      const { data: mat, error: matErr } = await supabase.rpc(
+        "gerar_matricula"
+      );
+
+      if (matErr) {
+        setErro("Erro ao gerar matrícula: " + matErr.message);
+        setLoading(false);
+        return;
+      }
+
+      payload.numero_matricula =
+        mat ?? `RR-${form.ano_letivo}-${Date.now()}`;
+      payload.criado_por = criadoPor;
+
       ({ error } = await supabase.from("alunos").insert(payload));
     }
 
-        if (error) {
+    if (error) {
       setErro(
         error.message.includes("duplicate")
           ? "Já existe um aluno com este número de matrícula."
@@ -147,14 +169,13 @@ export function AlunoModal({
       return;
     }
 
-    // Se é novo aluno com BI, criar acesso
+    // Criar acesso se for aluno novo com BI
     if (!aluno && payload.bi_documento) {
-      // Buscar o ID do aluno recém-criado
       const { data: novoAluno } = await supabase
         .from("alunos")
         .select("id")
         .eq("numero_matricula", payload.numero_matricula)
-        .single();
+        .maybeSingle();
 
       if (novoAluno?.id) {
         await fetch("/api/admin/aluno/criar-acesso", {
