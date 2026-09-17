@@ -33,8 +33,7 @@ export default async function AdminDashboard() {
       .eq("status", "pendente"),
     supabase
       .from("profiles")
-      .select("*", { count: "exact", head: true })
-      .eq("role", "aluno"),
+      .select("*", { count: "exact", head: true }),
     supabase.from("turmas").select("*", { count: "exact", head: true }),
     supabase.from("disciplinas").select("*", { count: "exact", head: true }),
   ]);
