@@ -19,6 +19,13 @@ type AlunoModalProps = {
   onSucesso: () => void;
 };
 
+function idValido(v: unknown): string | null {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (s === "" || s === "undefined" || s === "null") return null;
+  return s;
+}
+
 export function AlunoModal({
   aberto,
   onFechar,
@@ -72,7 +79,6 @@ export function AlunoModal({
     setForm((f) => ({ ...f, [campo]: valor }));
   }
 
-  // Turmas agrupadas por classe para o select
   const turmasAgrupadas = useMemo(() => {
     const grupos: Record<string, { classe: Classe; turmas: Turma[] }> = {};
     turmas.forEach((t) => {
@@ -93,7 +99,7 @@ export function AlunoModal({
     return `${t.nome}${area ? ` (Área ${area.codigo})` : ""}`;
   }
 
-    async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro(null);
 
@@ -109,23 +115,12 @@ export function AlunoModal({
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Validação robusta de UUIDs
-    function idValido(v: string | null | undefined): string | null {
-      if (!v) return null;
-      const s = String(v).trim();
-      if (s === "" || s === "undefined" || s === "null") return null;
-      return s;
-    }
-
-    const turmaId = idValido(form.turma_id);
-    const criadoPor = idValido(user?.id);
-
     const payload: Record<string, unknown> = {
       nome_completo: form.nome_completo.trim(),
       data_nascimento: form.data_nascimento || null,
       genero: form.genero || null,
       bi_documento: form.bi_documento.trim() || null,
-      turma_id: turmaId,
+      turma_id: idValido(form.turma_id),
       ano_letivo: parseInt(form.ano_letivo) || new Date().getFullYear(),
       nome_encarregado: form.nome_encarregado.trim() || null,
       telefone_encarregado: form.telefone_encarregado.trim() || null,
@@ -142,6 +137,7 @@ export function AlunoModal({
         .update(payload)
         .eq("id", aluno.id));
     } else {
+      // Gerar matrícula
       const { data: mat, error: matErr } = await supabase.rpc(
         "gerar_matricula"
       );
@@ -154,7 +150,7 @@ export function AlunoModal({
 
       payload.numero_matricula =
         mat ?? `RR-${form.ano_letivo}-${Date.now()}`;
-      payload.criado_por = criadoPor;
+      payload.criado_por = idValido(user?.id);
 
       ({ error } = await supabase.from("alunos").insert(payload));
     }
@@ -169,20 +165,28 @@ export function AlunoModal({
       return;
     }
 
-    // Criar acesso se for aluno novo com BI
+    // Criar acesso automático (só para aluno novo com BI)
     if (!aluno && payload.bi_documento) {
-      const { data: novoAluno } = await supabase
-        .from("alunos")
-        .select("id")
-        .eq("numero_matricula", payload.numero_matricula)
-        .maybeSingle();
+      try {
+        const { data: novoAluno } = await supabase
+          .from("alunos")
+          .select("id")
+          .eq("numero_matricula", payload.numero_matricula as string)
+          .maybeSingle();
 
-      if (novoAluno?.id) {
-        await fetch("/api/admin/aluno/criar-acesso", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ aluno_id: novoAluno.id }),
-        });
+        if (
+          novoAluno &&
+          typeof novoAluno.id === "string" &&
+          novoAluno.id.length > 10
+        ) {
+          await fetch("/api/admin/aluno/criar-acesso", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ aluno_id: novoAluno.id }),
+          });
+        }
+      } catch {
+        // Ignora — aluno já foi criado com sucesso
       }
     }
 
@@ -204,7 +208,6 @@ export function AlunoModal({
       tamanho="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Nome */}
         <div>
           <label className="block text-sm font-medium text-primary mb-2">
             Nome completo *
@@ -218,7 +221,6 @@ export function AlunoModal({
           />
         </div>
 
-        {/* Nascimento + Género */}
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-primary mb-2">
@@ -249,7 +251,6 @@ export function AlunoModal({
           </div>
         </div>
 
-        {/* BI */}
         <div>
           <label className="block text-sm font-medium text-primary mb-2">
             Nº de BI / Documento
@@ -260,9 +261,11 @@ export function AlunoModal({
             placeholder="Ex: 123456789A"
             disabled={loading}
           />
+          <p className="text-xs text-slate-500 mt-1">
+            Obrigatório para o aluno conseguir entrar no portal.
+          </p>
         </div>
 
-        {/* Turma + Ano letivo */}
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-primary mb-2">
@@ -299,7 +302,6 @@ export function AlunoModal({
           </div>
         </div>
 
-        {/* Estado (só edição) */}
         {aluno && (
           <div>
             <label className="block text-sm font-medium text-primary mb-2">
@@ -320,7 +322,6 @@ export function AlunoModal({
           </div>
         )}
 
-        {/* Encarregado */}
         <div className="border-t border-border pt-5">
           <p className="text-sm font-medium text-primary mb-3">
             Encarregado de educação
@@ -360,7 +361,6 @@ export function AlunoModal({
           </div>
         </div>
 
-        {/* Observações */}
         <div>
           <label className="block text-sm font-medium text-primary mb-2">
             Observações
