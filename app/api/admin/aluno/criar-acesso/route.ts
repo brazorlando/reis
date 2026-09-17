@@ -1,13 +1,21 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
+function idValido(v: unknown): string | null {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (s === "" || s === "undefined" || s === "null") return null;
+  return s;
+}
+
 export async function POST(request: Request) {
   try {
-    const { aluno_id } = await request.json();
+    const body = await request.json();
+    const aluno_id = idValido(body.aluno_id);
 
     if (!aluno_id) {
       return NextResponse.json(
-        { erro: "ID do aluno obrigatório." },
+        { erro: "ID do aluno inválido." },
         { status: 400 }
       );
     }
@@ -34,7 +42,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ sucesso: true, ja_existe: true });
     }
 
-    if (!aluno.bi_documento) {
+    if (!aluno.bi_documento || aluno.bi_documento.trim() === "") {
       return NextResponse.json(
         { erro: "Adicione o documento (BI) antes de criar o acesso." },
         { status: 400 }
@@ -44,51 +52,67 @@ export async function POST(request: Request) {
     const email = `${aluno.numero_matricula.toLowerCase()}@aluno.reis.local`;
     const senha = aluno.bi_documento.trim();
 
-    // Criar utilizador no auth
-    const { data: novoUser, error: authErr } = await admin.auth.admin.createUser({
-      email,
-      password: senha,
-      email_confirm: true,
-      user_metadata: {
-        nome_completo: aluno.nome_completo,
-        role: "aluno",
-        aluno_id: aluno.id,
-      },
-    });
+    const { data: novoUser, error: authErr } =
+      await admin.auth.admin.createUser({
+        email,
+        password: senha,
+        email_confirm: true,
+        user_metadata: {
+          nome_completo: aluno.nome_completo,
+          role: "aluno",
+          aluno_id: aluno.id,
+        },
+      });
 
-    if (authErr || !novoUser.user) {
+    if (authErr || !novoUser || !novoUser.user || !novoUser.user.id) {
       return NextResponse.json(
-        { erro: authErr?.message ?? "Erro ao criar acesso." },
+        { erro: authErr?.message ?? "Erro ao criar acesso no auth." },
         { status: 500 }
       );
     }
 
-    // Criar profile (para consistência com o resto do sistema)
-    await admin.from("profiles").upsert({
-      id: novoUser.user.id,
-      nome_completo: aluno.nome_completo,
-      email,
-      role: "aluno",
-      status: "aprovado",
-    });
+    const userId = idValido(novoUser.user.id);
+    if (!userId) {
+      return NextResponse.json(
+        { erro: "Erro: o servidor não retornou um ID válido." },
+        { status: 500 }
+      );
+    }
 
-    // Atualizar aluno com user_id
+    const { error: profErr } = await admin.from("profiles").upsert(
+      {
+        id: userId,
+        nome_completo: aluno.nome_completo,
+        email,
+        role: "aluno",
+        status: "aprovado",
+      },
+      { onConflict: "id" }
+    );
+
+    if (profErr) {
+      return NextResponse.json(
+        { erro: "Erro ao criar perfil: " + profErr.message },
+        { status: 500 }
+      );
+    }
+
     const { error: updErr } = await admin
       .from("alunos")
-      .update({ user_id: novoUser.user.id })
+      .update({ user_id: userId })
       .eq("id", aluno.id);
 
     if (updErr) {
       return NextResponse.json(
-        { erro: "Conta criada, mas erro ao associar ao aluno." },
+        { erro: "Conta criada, mas erro ao associar: " + updErr.message },
         { status: 500 }
       );
     }
 
     return NextResponse.json({ sucesso: true });
-  } catch {
+  } catch (e) {
     return NextResponse.json(
-      { erro: "Erro inesperado." },
+      { erro: "Erro inesperado: " + (e as Error).message },
       { status: 500 }
     );
   }
