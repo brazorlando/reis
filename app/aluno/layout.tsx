@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AlunoSidebar } from "@/components/layout/aluno-sidebar";
+import { Sidebar } from "@/components/layout/sidebar";
+import { SidebarProvider } from "@/components/layout/sidebar-provider";
 
-export default async function AlunoLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -21,14 +22,16 @@ export default async function AlunoLayout({
     .eq("id", user.id)
     .single();
 
-  if (!profile || profile.role !== "aluno" || profile.status !== "aprovado") {
+  if (!profile || profile.role !== "admin" || profile.status !== "aprovado") {
     redirect("/login");
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <AlunoSidebar />
-      <div className="flex-1 flex flex-col min-w-0">{children}</div>
-    </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen bg-background">
+        <Sidebar />
+        <div className="flex-1 flex flex-col min-w-0">{children}</div>
+      </div>
+    </SidebarProvider>
   );
 }
