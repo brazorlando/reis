@@ -23,18 +23,23 @@ export default async function AdminDashboard() {
     { count: totalTurmas },
     { count: totalDisciplinas },
   ] = await Promise.all([
+    // Professores: role = funcionario E aprovado
     supabase
       .from("profiles")
       .select("*", { count: "exact", head: true })
+      .eq("role", "funcionario")
       .eq("status", "aprovado"),
+    // Pendentes: role = funcionario E pendente
     supabase
       .from("profiles")
       .select("*", { count: "exact", head: true })
+      .eq("role", "funcionario")
       .eq("status", "pendente"),
-    supabase
-      .from("profiles")
-      .select("*", { count: "exact", head: true }),
+    // Alunos: tabela alunos (todos os que existem)
+    supabase.from("alunos").select("*", { count: "exact", head: true }),
+    // Turmas
     supabase.from("turmas").select("*", { count: "exact", head: true }),
+    // Disciplinas
     supabase.from("disciplinas").select("*", { count: "exact", head: true }),
   ]);
 
@@ -42,6 +47,7 @@ export default async function AdminDashboard() {
   const { data: pendentes } = await supabase
     .from("profiles")
     .select("id, nome_completo, email, criado_em")
+    .eq("role", "funcionario")
     .eq("status", "pendente")
     .order("criado_em", { ascending: false })
     .limit(5);
@@ -53,6 +59,7 @@ export default async function AdminDashboard() {
       icone: Users,
       cor: "text-primary",
       bg: "bg-primary-50",
+      href: "/admin/professores",
     },
     {
       titulo: "Alunos",
@@ -60,6 +67,7 @@ export default async function AdminDashboard() {
       icone: GraduationCap,
       cor: "text-accent",
       bg: "bg-accent-50",
+      href: "/admin/alunos",
     },
     {
       titulo: "Turmas",
@@ -67,6 +75,7 @@ export default async function AdminDashboard() {
       icone: School,
       cor: "text-success",
       bg: "bg-success-50",
+      href: "/admin/estrutura/turmas",
     },
     {
       titulo: "Disciplinas",
@@ -74,15 +83,13 @@ export default async function AdminDashboard() {
       icone: BookOpen,
       cor: "text-info",
       bg: "bg-info-50",
+      href: "/admin/estrutura/disciplinas",
     },
   ];
 
   return (
     <>
-      <Header
-        titulo="Dashboard"
-        subtitulo="Visão geral da escola"
-      />
+      <Header titulo="Dashboard" subtitulo="Visão geral da escola" />
 
       <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
         {/* Cards de métricas */}
@@ -90,9 +97,10 @@ export default async function AdminDashboard() {
           {cards.map((c) => {
             const Icone = c.icone;
             return (
-              <div
+              <Link
                 key={c.titulo}
-                className="bg-surface border border-border rounded-xl p-5 shadow-card"
+                href={c.href}
+                className="group bg-surface border border-border rounded-xl p-5 shadow-card hover:border-accent/40 transition-colors"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div
@@ -100,12 +108,16 @@ export default async function AdminDashboard() {
                   >
                     <Icone size={20} />
                   </div>
+                  <ArrowRight
+                    size={16}
+                    className="text-slate-300 group-hover:text-accent transition-colors"
+                  />
                 </div>
                 <p className="text-3xl font-serif text-primary mb-1">
                   {c.valor}
                 </p>
                 <p className="text-sm text-slate-500">{c.titulo}</p>
-              </div>
+              </Link>
             );
           })}
         </div>
@@ -138,7 +150,7 @@ export default async function AdminDashboard() {
           </div>
         )}
 
-        {/* Dois painéis: pendentes + atividade */}
+        {/* Dois painéis */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Últimos pendentes */}
           <div className="bg-surface border border-border rounded-xl shadow-card">
@@ -210,10 +222,10 @@ export default async function AdminDashboard() {
                 descricao="Adicionar nova turma"
               />
               <AtalhoRapido
-                href="/admin/comunicacao"
-                icone={Users}
-                titulo="Comunicado"
-                descricao="Enviar aviso"
+                href="/admin/alunos"
+                icone={GraduationCap}
+                titulo="Alunos"
+                descricao="Gerir matrículas"
               />
             </div>
           </div>
@@ -239,9 +251,7 @@ function AtalhoRapido({
       href={href}
       className="p-4 rounded-lg border border-border hover:border-accent/40 hover:bg-accent-50/30 transition-colors group"
     >
-      <Icone
-        size={20}
-      />
+      <Icone size={20} />
       <p className="text-sm font-medium text-primary mt-2">{titulo}</p>
       <p className="text-xs text-slate-500 mt-0.5">{descricao}</p>
     </Link>
