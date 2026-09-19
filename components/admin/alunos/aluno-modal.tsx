@@ -6,6 +6,8 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { FileUpload } from "@/components/ui/file-upload";
+import { uploadFicheiro } from "@/lib/storage";
 import { Loader2, Check, AlertCircle } from "lucide-react";
 import type { Aluno, Area, Classe, Turma } from "@/types/database";
 
@@ -48,6 +50,7 @@ export function AlunoModal({
     endereco: "",
     status: "ativo" as Aluno["status"],
     observacoes: "",
+    foto_url: null as string | null,
   });
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -69,6 +72,7 @@ export function AlunoModal({
       endereco: aluno?.endereco ?? "",
       status: aluno?.status ?? "ativo",
       observacoes: aluno?.observacoes ?? "",
+      foto_url: aluno?.foto_url ?? null,
     });
   }, [aberto, aluno]);
 
@@ -97,6 +101,14 @@ export function AlunoModal({
   function labelTurma(t: Turma) {
     const area = t.area_id ? areas.find((a) => a.id === t.area_id) : null;
     return `${t.nome}${area ? ` (Área ${area.codigo})` : ""}`;
+  }
+
+  async function uploadFoto(file: File) {
+    const prefixo = form.nome_completo
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .substring(0, 20) || "aluno";
+    return await uploadFicheiro(file, "alunos", prefixo);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -128,6 +140,7 @@ export function AlunoModal({
       endereco: form.endereco.trim() || null,
       status: form.status,
       observacoes: form.observacoes.trim() || null,
+      foto_url: form.foto_url,
     };
 
     let error;
@@ -137,7 +150,6 @@ export function AlunoModal({
         .update(payload)
         .eq("id", aluno.id));
     } else {
-      // Gerar matrícula
       const { data: mat, error: matErr } = await supabase.rpc(
         "gerar_matricula"
       );
@@ -165,7 +177,7 @@ export function AlunoModal({
       return;
     }
 
-    // Criar acesso automático (só para aluno novo com BI)
+    // Criar acesso automático
     if (!aluno && payload.bi_documento) {
       try {
         const { data: novoAluno } = await supabase
@@ -186,7 +198,7 @@ export function AlunoModal({
           });
         }
       } catch {
-        // Ignora — aluno já foi criado com sucesso
+        // Ignora
       }
     }
 
@@ -208,6 +220,24 @@ export function AlunoModal({
       tamanho="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Foto */}
+        <div>
+          <label className="block text-sm font-medium text-primary mb-2">
+            Fotografia
+          </label>
+          <FileUpload
+            valor={form.foto_url}
+            onChange={(url) => atualizar("foto_url", url)}
+            onUpload={uploadFoto}
+            formato="quadrado"
+            tamanho="md"
+            placeholder="Sem fotografia"
+            disabled={loading}
+          />
+        </div>
+
+        <div className="border-t border-border" />
+
         <div>
           <label className="block text-sm font-medium text-primary mb-2">
             Nome completo *
