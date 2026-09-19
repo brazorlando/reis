@@ -208,3 +208,22 @@ export type Atribuicao = {
   criado_por: string | null;
   criado_em: string;
 };
+
+// ---------- ESCOLA CONFIG ----------
+export type EscolaConfig = {
+  id: string;
+  nome: string;
+  slogan: string | null;
+  logo_url: string | null;
+  favicon_url: string | null;
+  logo_estilo: "quadrado" | "redondo" | "retangular";
+  cor_primaria: string | null;
+  cor_accent: string | null;
+  telefone: string | null;
+  email: string | null;
+  endereco: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  whatsapp_numero: string | null;
+  atualizado_em: string;
+};
